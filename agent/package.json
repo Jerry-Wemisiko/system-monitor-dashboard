@@ -1,16 +1,25 @@
 {
   "name": "agent",
   "version": "1.0.0",
-  "description": "",
+  "description": "Cross-platform system monitoring agent that reports machine stats to the central server.",
   "main": "agent.js",
   "scripts": {
-    "start": "node agent.js"
+    "start": "node agent.js",
+    "package-agent": "pkg agent.js --targets node16-win-x64,node16-macos-x64,node16-linux-x64 --output agent-"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "monitor",
+    "agent",
+    "system",
+    "stats"
+  ],
+  "author": "Jerry Wemisiko",
   "license": "ISC",
   "dependencies": {
     "axios": "^1.8.4",
     "systeminformation": "^5.25.11"
+  },
+  "devDependencies": {
+    "pkg": "^5.8.0"
   }
 }

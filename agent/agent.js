@@ -1,49 +1,37 @@
 const si = require('systeminformation');
 const axios = require('axios');
 
-// The URL of your deployed server to receive stats
-const serverUrl = 'http://localhost:3000/stats'; // Replace with your server URL once deployed
+// Server URL — update when deploying
+const serverUrl = 'http://localhost:3000/stats'; // Change to public URL when deployed
 
-// Define the function to get stats and send to the server
+// Function to gather and send system stats
 async function getStatsAndSend() {
   try {
     console.log('Fetching system stats...');
 
-    // Log available methods in systeminformation
-    console.log(Object.keys(si));
-
-    // Get system stats
-    const memory = await si.mem();
-    const osInfo = await si.osInfo();  // Get OS info which includes uptime
-
-    // Log the stats to verify if they are being fetched
-    console.log('Memory Stats:', memory);
-    console.log('OS Info:', osInfo);
-
-    // Extract uptime from osInfo
-    const uptime = osInfo.uptime;
+    const mem = await si.mem();
+    const os = await si.osInfo();
+    const uuid = await si.uuid();
 
     const systemStats = {
-      totalMemory: memory.total,
-      freeMemory: memory.free,
-      uptime: uptime,
+      machineId: uuid.os, // Unique per machine
+      hostname: os.hostname,
+      totalMemory: mem.total,
+      freeMemory: mem.free,
+      uptime: process.uptime() // Uptime since agent started
     };
 
-    // Log the system stats to verify that we're sending the correct data
-    console.log('System Stats to be sent:', systemStats);
+    console.log('[Sending stats] ->', systemStats);
 
-    // Send stats to the server
     await axios.post(serverUrl, systemStats);
-    console.log('Stats sent successfully');
-  } catch (error) {
-    console.error('Error getting or sending system stats:', error);
+    console.log('✅ Stats sent successfully');
+  } catch (err) {
+    console.error('❌ Error getting/sending stats:', err.message);
   }
 }
 
-// Export the function so it can be required and used in other files
-module.exports = {
-  getStatsAndSend,
-};
+// Run every 60 seconds
+setInterval(getStatsAndSend, 60000);
 
-// Run the stats function every minute (or adjust as needed)
-setInterval(getStatsAndSend, 60000); // Send stats every minute
+// Also run immediately on startup
+getStatsAndSend();
