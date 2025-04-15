@@ -9,16 +9,19 @@
   <!-- Bootstrap CSS -->
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" />
 
-  <!-- Custom CSS for any additional styling (optional) -->
+  <!-- Custom CSS for additional styling -->
   <link rel="stylesheet" href="/css/style.css" />
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body class="bg-light">
 
-  <!-- Header -->
+  <!-- Header Section -->
   <header class="bg-primary text-white text-center py-5">
     <h1 class="display-4">🖥️ System Monitor Dashboard</h1>
-    <p class="lead">Your system real-time stats</p>
+    <p class="lead">Real-time system stats at your fingertips</p>
   </header>
 
   <!-- Main Content -->
@@ -53,7 +56,7 @@
       <div class="col-md-4 mb-4">
         <div class="card text-center">
           <div class="card-header bg-success text-white">
-            <h4>Uptime</h4>
+            <h4>Uptime (Seconds)</h4>
           </div>
           <div class="card-body">
             <h5 id="uptime" class="display-4">Loading...</h5>
@@ -62,23 +65,118 @@
       </div>
     </div>
 
+    <!-- Chart for System Stats -->
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header bg-dark text-white">
+            <h4>System Stats Graph</h4>
+          </div>
+          <div class="card-body">
+            <canvas id="statsChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </main>
 
-  <!-- Socket.IO & JS goes at the bottom of the body -->
+  <!-- Socket.IO and JS goes at the bottom of the body -->
   <script src="/socket.io/socket.io.js"></script>
 
   <script>
     const socket = io();
 
-    socket.on('system-stats', (data) => {
-      const totalMB = (data.totalMemory / 1024 / 1024).toFixed(2);
-      const freeMB = (data.freeMemory / 1024 / 1024).toFixed(2);
-      const uptimeMinutes = Math.floor(data.uptime / 60);
+    // Set up the chart
+    const ctx = document.getElementById('statsChart').getContext('2d');
+    const chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: [], // Time labels
+        datasets: [
+          {
+            label: 'Total Memory (MB)',
+            data: [],
+            borderColor: 'rgb(0, 123, 255)',
+            fill: false,
+            tension: 0.1
+          },
+          {
+            label: 'Free Memory (MB)',
+            data: [],
+            borderColor: 'rgb(255, 193, 7)',
+            fill: false,
+            tension: 0.1
+          },
+          {
+            label: 'Uptime (Seconds)',
+            data: [],
+            borderColor: 'rgb(40, 167, 69)',
+            fill: false,
+            tension: 0.1
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            display: true,
+            position: 'top'
+          },
+          tooltip: {
+            enabled: true
+          }
+        },
+        scales: {
+          x: {
+            type: 'linear',
+            position: 'bottom',
+            ticks: {
+              autoSkip: true,
+              maxTicksLimit: 20
+            },
+            title: {
+              display: true,
+              text: 'Time (milliseconds)',
+            }
+          },
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Value',
+            }
+          }
+        }
+      }
+    });
 
-      // Update HTML elements with new values
+    // Real-time data update
+    socket.on('system-stats', (data) => {
+      const totalMB = (data.totalMemory / 1024 / 1024).toFixed(2);  // Convert bytes to MB
+      const freeMB = (data.freeMemory / 1024 / 1024).toFixed(2);    // Convert bytes to MB
+      const uptimeSeconds = data.uptime;                             // Keep uptime in seconds
+
+      // Update memory stats on the page
       document.getElementById('totalMem').textContent = `${totalMB} MB`;
       document.getElementById('freeMem').textContent = `${freeMB} MB`;
-      document.getElementById('uptime').textContent = `${uptimeMinutes} minutes`;
+      document.getElementById('uptime').textContent = `${uptimeSeconds} seconds`;
+
+      // Update chart data
+      const currentTime = Date.now();
+      chart.data.labels.push(currentTime);
+      chart.data.datasets[0].data.push(totalMB);
+      chart.data.datasets[1].data.push(freeMB);
+      chart.data.datasets[2].data.push(uptimeSeconds);
+
+      // Limit chart data length to 100 points for smooth performance
+      if (chart.data.labels.length > 100) {
+        chart.data.labels.shift();
+        chart.data.datasets.forEach(dataset => dataset.data.shift());
+      }
+
+      chart.update();
     });
   </script>
 
