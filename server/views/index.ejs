@@ -12,6 +12,9 @@
   <!-- Custom CSS for additional styling -->
   <link rel="stylesheet" href="/css/style.css" />
 
+  <!-- Font Awesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -20,20 +23,55 @@
 
   <!-- Header Section -->
   <header class="bg-primary text-white text-center py-5">
-    <h1 class="display-4">🖥️ System Monitor Dashboard</h1>
-    <p class="lead">Real-time system stats at your fingertips</p>
+    <h1 class="display-4">🖥️ Your Personal System Monitor</h1>
+    <p class="lead">Monitor and download the agent for your machine to track system stats in real-time!</p>
   </header>
 
-  <!-- Main Content -->
+  <!-- Download Section -->
+  <section class="container mt-5">
+    <h2 class="text-center mb-4">Get Your System Monitoring Agent</h2>
+
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <ul class="list-group">
+          <!-- Windows Agent -->
+          <li class="list-group-item">
+            <a href="/downloads/agent-win.exe" download class="btn btn-block btn-danger">
+              <i class="fas fa-windows"></i> WINDOWS SYSTEM STATS
+            </a>
+          </li>
+          <!-- macOS Agent -->
+          <li class="list-group-item">
+            <a href="/downloads/agent-macos" download class="btn btn-block btn-dark">
+              <i class="fab fa-apple"></i> macOS SYSTEM STATS
+            </a>
+          </li>
+          <!-- Linux Agent -->
+          <li class="list-group-item">
+            <a href="/downloads/agent-linux" download class="btn btn-block btn-success">
+              <i class="fab fa-linux"></i> LINUX SYSTEM STATS
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="text-center mt-3">Simply download and install the agent for your OS to start monitoring your system's performance.</p>
+  </section>
+
+  <!-- Main Content Section -->
   <main class="container my-5">
 
     <!-- Button to trigger system stats -->
     <div class="text-center mb-4">
-      <button id="getStatsBtn" class="btn btn-primary btn-lg">Click to Get My System Stats</button>
+      <button id="getStatsBtn" class="btn btn-primary btn-lg">
+        <i class="fas fa-sync-alt"></i> Get My System Stats
+      </button>
+      <p class="mt-2" id="statsInfo">Click to start monitoring your system stats in real-time!</p>
     </div>
 
+    <!-- System Stats Cards -->
     <div class="row">
-      <!-- Total Memory Card -->
       <div class="col-md-4 mb-4">
         <div class="card text-center">
           <div class="card-header bg-info text-white">
@@ -41,11 +79,11 @@
           </div>
           <div class="card-body">
             <h5 id="totalMem" class="display-4">Loading...</h5>
+            <p>See how much memory is available on your system</p>
           </div>
         </div>
       </div>
 
-      <!-- Free Memory Card -->
       <div class="col-md-4 mb-4">
         <div class="card text-center">
           <div class="card-header bg-warning text-white">
@@ -53,11 +91,11 @@
           </div>
           <div class="card-body">
             <h5 id="freeMem" class="display-4">Loading...</h5>
+            <p>Check how much free memory is left</p>
           </div>
         </div>
       </div>
 
-      <!-- Uptime Card -->
       <div class="col-md-4 mb-4">
         <div class="card text-center">
           <div class="card-header bg-success text-white">
@@ -65,12 +103,13 @@
           </div>
           <div class="card-body">
             <h5 id="uptime" class="display-4">Loading...</h5>
+            <p>See how long your system has been running</p>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Chart for System Stats -->
+    <!-- Real-time System Stats Chart -->
     <div class="row">
       <div class="col-12">
         <div class="card">
@@ -86,7 +125,8 @@
 
   </main>
 
-  <!-- Socket.IO and JS goes at the bottom of the body -->
+  <!-- Socket.IO and JS -->
+  <script src="/js/bootstrap.bundle.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
 
   <script>
@@ -97,7 +137,7 @@
     const chart = new Chart(ctx, {
       type: 'line',
       data: {
-        labels: [], // Time labels
+        labels: [],
         datasets: [
           {
             label: 'Total Memory (MB)',
@@ -159,9 +199,12 @@
 
     // Real-time data update
     socket.on('system-stats', (data) => {
-      const totalMB = (data.totalMemory / 1024 / 1024).toFixed(2);  // Convert bytes to MB
-      const freeMB = (data.freeMemory / 1024 / 1024).toFixed(2);    // Convert bytes to MB
-      const uptimeSeconds = data.uptime;                             // Keep uptime in seconds
+
+      const machineId = data.machineId; // Add machineId here if it's coming from server
+
+      const totalMB = (data.totalMemory / 1024 / 1024).toFixed(2);
+      const freeMB = (data.freeMemory / 1024 / 1024).toFixed(2);
+      const uptimeSeconds = data.uptime;
 
       // Update memory stats on the page
       document.getElementById('totalMem').textContent = `${totalMB} MB`;
@@ -175,7 +218,7 @@
       chart.data.datasets[1].data.push(freeMB);
       chart.data.datasets[2].data.push(uptimeSeconds);
 
-      // Limit chart data length to 100 points for smooth performance
+      // Limit chart data length to 100 points
       if (chart.data.labels.length > 100) {
         chart.data.labels.shift();
         chart.data.datasets.forEach(dataset => dataset.data.shift());
@@ -186,16 +229,12 @@
 
     // Event listener for the button click to trigger stats fetch
     document.getElementById('getStatsBtn').addEventListener('click', () => {
-      socket.emit('get-stats');  // Send event to request system stats from server
-      document.getElementById('getStatsBtn').disabled = true;  // Disable button while fetching
+      socket.emit('get-stats');
+      document.getElementById('getStatsBtn').disabled = true;
       document.getElementById('getStatsBtn').innerText = 'Fetching Stats...';
+      document.getElementById('statsInfo').innerText = 'Fetching real-time stats... Please wait.';
     });
   </script>
-
-  <!-- Optional Bootstrap JS -->
-  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.7/dist/umd/popper.min.js"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 </body>
 

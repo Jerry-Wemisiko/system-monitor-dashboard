@@ -4,6 +4,7 @@ const path = require('path');
 const http = require('http');
 const socketIo = require('socket.io');
 const os = require('os');
+const cors = require('cors')
 
 // Initialize express app
 const app = express();
@@ -12,15 +13,20 @@ const io = socketIo(server);
 
 const PORT = process.env.PORT || 3000;
 
+
+app.use(cors());
 // Set view engine to ejs
 app.set('view engine', 'ejs');
 
-// Set folder for static files
+// Set folder for static files (public directory)
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Set up routes
+// Set up routes (assuming you have a dashboard route for '/')
 const dashboardRoute = require('./routes/dashboard');
 app.use('/', dashboardRoute);
+
+// Serve downloadable files from the 'downloads' directory
+app.use('/downloads', express.static(path.join(__dirname, 'public', 'downloads')));
 
 // Middleware to parse JSON bodies
 app.use(express.json()); // Required to handle POST requests with JSON data
@@ -28,6 +34,9 @@ app.use(express.json()); // Required to handle POST requests with JSON data
 // Handle socket connection and system stats emission
 io.on('connection', (socket) => {
     console.log('✅ A client connected');
+
+    const machineId = socket.id;  // Use the socket ID or assign a machine ID if available
+
 
     // Emit system stats to the connected user (client's system stats)
     const interval = setInterval(() => {
@@ -37,6 +46,7 @@ io.on('connection', (socket) => {
 
         // Send the stats to the client via socket
         socket.emit('system-stats', {
+            machineId,
             totalMemory,
             freeMemory,
             uptime
@@ -51,6 +61,7 @@ io.on('connection', (socket) => {
 
         // Send the stats to the client immediately after they requested it
         socket.emit('system-stats', {
+            machineId,
             totalMemory,
             freeMemory,
             uptime
