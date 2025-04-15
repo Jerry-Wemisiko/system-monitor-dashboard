@@ -1,13 +1,92 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sys-Monitor Dashboard</title>
-    <link rel="stylesheet" href="/css/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sys-Monitor Dashboard</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" />
+
+  <!-- Custom CSS for any additional styling (optional) -->
+  <link rel="stylesheet" href="/css/style.css" />
 </head>
-<body>
-    <h1>System Monitor Dashboard</h1>
-    <p>Your System Real Time Stats </p>
+
+<body class="bg-light">
+
+  <!-- Header -->
+  <header class="bg-primary text-white text-center py-5">
+    <h1 class="display-4">🖥️ System Monitor Dashboard</h1>
+    <p class="lead">Your system real-time stats</p>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container my-5">
+
+    <div class="row">
+      <!-- Total Memory Card -->
+      <div class="col-md-4 mb-4">
+        <div class="card text-center">
+          <div class="card-header bg-info text-white">
+            <h4>Total Memory</h4>
+          </div>
+          <div class="card-body">
+            <h5 id="totalMem" class="display-4">Loading...</h5>
+          </div>
+        </div>
+      </div>
+
+      <!-- Free Memory Card -->
+      <div class="col-md-4 mb-4">
+        <div class="card text-center">
+          <div class="card-header bg-warning text-white">
+            <h4>Free Memory</h4>
+          </div>
+          <div class="card-body">
+            <h5 id="freeMem" class="display-4">Loading...</h5>
+          </div>
+        </div>
+      </div>
+
+      <!-- Uptime Card -->
+      <div class="col-md-4 mb-4">
+        <div class="card text-center">
+          <div class="card-header bg-success text-white">
+            <h4>Uptime</h4>
+          </div>
+          <div class="card-body">
+            <h5 id="uptime" class="display-4">Loading...</h5>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Socket.IO & JS goes at the bottom of the body -->
+  <script src="/socket.io/socket.io.js"></script>
+
+  <script>
+    const socket = io();
+
+    socket.on('system-stats', (data) => {
+      const totalMB = (data.totalMemory / 1024 / 1024).toFixed(2);
+      const freeMB = (data.freeMemory / 1024 / 1024).toFixed(2);
+      const uptimeMinutes = Math.floor(data.uptime / 60);
+
+      // Update HTML elements with new values
+      document.getElementById('totalMem').textContent = `${totalMB} MB`;
+      document.getElementById('freeMem').textContent = `${freeMB} MB`;
+      document.getElementById('uptime').textContent = `${uptimeMinutes} minutes`;
+    });
+  </script>
+
+  <!-- Optional Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.7/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
 </body>
+
 </html>
