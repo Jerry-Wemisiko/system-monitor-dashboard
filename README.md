@@ -1,27 +1,27 @@
 # 🖥️ System Monitor Dashboard
 
-**System Monitor Dashboard** is a self-hosted, real-time monitoring solution designed to provide insights into critical system metrics such as CPU usage, memory consumption, disk usage, network activity, and system uptime. Built with **Node.js** and **Express.js**, this dashboard offers a lightweight, fast, and highly customizable platform for developers, system administrators, and enthusiasts looking for a comprehensive overview of their system's health.
+**System Monitor Dashboard** is a self-hosted, real-time monitoring solution designed to provide insights into critical system metrics such as memory consumption, CPU usage, disk usage, network activity, and system uptime. Built with **Node.js**, **Express.js**, and **Socket.IO**, this dashboard offers a lightweight, fast, and highly customizable platform for developers, system administrators, and enthusiasts looking for a comprehensive overview of their system's health.
 
 ---
 
 ## 📊 Features
 
-- 🔍 **Real-Time System Stats**
+- 🔍 **Real-Time System Stats**  
   - Monitor key system metrics including CPU usage, memory (RAM), disk usage, network I/O, and load averages.
-  
-- ⏱️ **System Uptime Tracker**
+
+- ⏱️ **System Uptime Tracker**  
   - Tracks system uptime since the last reboot, providing an overview of system longevity.
 
-- 📡 **Live Updates**
+- 📡 **Live Updates**  
   - Live, real-time updates via **Socket.IO**, ensuring a smooth and continuous data stream without needing page refreshes.
 
-- 🧰 **Modular Backend**
+- 🧰 **Modular Backend**  
   - Easily extendable backend architecture, making it simple to add new metrics, alerts, or other features.
 
-- 🔒 **Self-Hosted**
+- 🔒 **Self-Hosted**  
   - Complete control over your data. All metrics are displayed locally on your own server, ensuring your privacy.
 
-- 🐳 **Docker-Ready** (Optional)
+- 🐳 **Docker-Ready** (Optional)  
   - Seamless containerized deployment using Docker for easy setup and scaling.
 
 ---
@@ -44,7 +44,7 @@ Before starting, make sure you have the following installed:
 
 - **Node.js** (v16 or higher recommended)
 - **npm** (comes with Node.js)
-- (Optional) **Docker** for containerized deployment
+- **Docker** (optional, for containerized deployment)
 
 ### Installation
 
