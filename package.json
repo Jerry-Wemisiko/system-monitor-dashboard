@@ -1,0 +1,25 @@
+{
+  "name": "sys-monitor",
+  "version": "1.0.0",
+  "description": "**System Monitor Dashboard** is a self-hosted, real-time dashboard for monitoring key system metrics such as CPU usage, memory consumption, disk usage, network activity, and system uptime. Built with Node.js, it's lightweight, fast, and ideal for developers, sysadmins, or self-hosting enthusiasts who want insight into their infrastructure at a glance.",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jerry-Wemisiko/system-monitor-dashboard.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Jerry-Wemisiko/system-monitor-dashboard/issues"
+  },
+  "homepage": "https://github.com/Jerry-Wemisiko/system-monitor-dashboard#readme",
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^5.1.0"
+  }
+}
