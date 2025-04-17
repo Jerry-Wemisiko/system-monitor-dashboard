@@ -4,87 +4,80 @@ const path = require('path');
 const http = require('http');
 const socketIo = require('socket.io');
 const os = require('os');
-const cors = require('cors')
+const cors = require('cors');
 
-// Initialize express app
+// Initialize Express and HTTP server
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
 
+// Use dynamic port for Render deployment
 const PORT = process.env.PORT || 3000;
 
-
+// Enable CORS
 app.use(cors());
-// Set view engine to ejs
+
+// Middleware to parse JSON bodies
+app.use(express.json());
+
+// Set view engine to EJS
 app.set('view engine', 'ejs');
 
-// Set folder for static files (public directory)
+// Serve static files from 'public' directory
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Set up routes (assuming you have a dashboard route for '/')
+// Serve downloadable agent files
+app.use('/downloads', express.static(path.join(__dirname, 'public', 'downloads')));
+
+// Load routes
 const dashboardRoute = require('./routes/dashboard');
 app.use('/', dashboardRoute);
 
-// Serve downloadable files from the 'downloads' directory
-app.use('/downloads', express.static(path.join(__dirname, 'public', 'downloads')));
-
-// Middleware to parse JSON bodies
-app.use(express.json()); // Required to handle POST requests with JSON data
-
-// Handle socket connection and system stats emission
+// Handle WebSocket connections
 io.on('connection', (socket) => {
-    console.log('✅ A client connected');
+    console.log('✅ A client connected via Socket.IO');
 
-    const machineId = socket.id;  // Use the socket ID or assign a machine ID if available
+    const machineId = socket.id;
 
-
-    // Emit system stats to the connected user (client's system stats)
+    // Emit system stats every second
     const interval = setInterval(() => {
-        const totalMemory = os.totalmem();   // Total memory in bytes
-        const freeMemory = os.freemem();     // Free memory in bytes
-        const uptime = os.uptime();          // Uptime in seconds
-
-        // Send the stats to the client via socket
-        socket.emit('system-stats', {
+        const stats = {
             machineId,
-            totalMemory,
-            freeMemory,
-            uptime
-        });
-    }, 1000); // Emit stats every 1 second
+            totalMemory: os.totalmem(),
+            freeMemory: os.freemem(),
+            uptime: os.uptime(),
+        };
+        socket.emit('system-stats', stats);
+    }, 1000);
 
-    // Listen for the 'get-stats' event from the client
+    // Allow client to request stats manually
     socket.on('get-stats', () => {
-        const totalMemory = os.totalmem();   // Total memory in bytes
-        const freeMemory = os.freemem();     // Free memory in bytes
-        const uptime = os.uptime();          // Uptime in seconds
-
-        // Send the stats to the client immediately after they requested it
-        socket.emit('system-stats', {
+        const stats = {
             machineId,
-            totalMemory,
-            freeMemory,
-            uptime
-        });
+            totalMemory: os.totalmem(),
+            freeMemory: os.freemem(),
+            uptime: os.uptime(),
+        };
+        socket.emit('system-stats', stats);
     });
 
-    // Stop the interval if the client disconnects
     socket.on('disconnect', () => {
         console.log('❌ A client disconnected');
         clearInterval(interval);
     });
 });
 
-// POST route to handle stats from the agent (Optional)
+// Endpoint to receive stats from the agent
 app.post('/stats', (req, res) => {
     const stats = req.body;
-    console.log('Received system stats:', stats);
+    console.log('📥 Received system stats from agent:', stats);
+    res.status(200).json({ message: '✅ Stats received successfully' });
 
-    // Respond with a confirmation
-    res.status(200).json({ message: 'Stats received successfully' });
+    // You can also emit these stats to a specific frontend user if needed
+    // io.emit('system-stats', stats);
 });
 
-// Start server
+// Start the server
 server.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(`✅ Server is live at: http://localhost:${PORT}`);
 });
