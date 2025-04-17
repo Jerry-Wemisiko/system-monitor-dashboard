@@ -1,0 +1,26 @@
+# Node dependencies
+**/node_modules/
+
+# Dependency locks (optional – useful if not committing lockfiles)
+# Uncomment if you don’t want them versioned
+# **/package-lock.json
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# Compiled agents and binaries
+agent/agent--linux
+agent/agent--macos
+agent/agent--win.exe
+
+# Logs
+*.log
+
+# Optional: IDE/editor settings
+.vscode/
+.idea/
+
+# Ignore build artifacts if any are added later
+/dist/
+/build/
